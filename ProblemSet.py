@@ -24,7 +24,7 @@ class ProblemSet:
     # @param name The name of the problem set.
     def __init__(self,name):
         # The name of the problem set.
-        self.name=name
+        self.name=name  #Basic Problems B
 
         # A list of the problems in the problem set.
         self.problems=[]
@@ -37,17 +37,21 @@ class ProblemSet:
     # Your agent does not need to use this method.
     def loadProblemSet(self):
         r = open("Problems" + os.sep + self.name + os.sep + "ProblemList.txt")
+        #Basic Problem B-01
+        #Basic Problem B-02
+        # ...
         line = self.getNextLine(r)
         while not line=="":
             self.loadProblem(line)
             line=self.getNextLine(r)
 
     def loadProblem(self, problemName):
+        # Basic Problem B-01
         r = open("Problems" + os.sep + self.name + os.sep + problemName + os.sep + "ProblemData.txt")
-        problemType=self.getNextLine(r)
-        correctAnswer=int(self.getNextLine(r))
-        hasVisual=self.getNextLine(r)=="true"
-        hasVerbal=self.getNextLine(r)=="true"
+        problemType=self.getNextLine(r)         # 2x2
+        correctAnswer=int(self.getNextLine(r))  # 3
+        hasVisual=self.getNextLine(r)=="true"   #true
+        hasVerbal=self.getNextLine(r)=="true"   #true
 
         newProblem=RavensProblem(problemName, problemType, correctAnswer, hasVisual, hasVerbal)
         if newProblem.hasVerbal:

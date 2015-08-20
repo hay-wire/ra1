@@ -11,6 +11,12 @@
 # Install Pillow and uncomment this line to access image processing.
 #from PIL import Image
 
+
+from PIL import Image
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
     # processing necessary before your Agent starts solving problems here.
@@ -18,7 +24,16 @@ class Agent:
     # Do not add any variables to this signature; they will not be used by
     # main().
     def __init__(self):
-        pass
+       pass
+
+    def imageToPixelMatrix(self, image):
+        w,h = image.size
+        imageL = image.convert('L')
+        imageMatrix = np.zeros(image.size)
+        for x in range(0, w) :
+           for y in range(0, h) :
+               imageMatrix[x][y] = imageL.getpixel((x, y))
+        return imageMatrix
 
     # The primary method for solving incoming Raven's Progressive Matrices.
     # For each problem, your Agent's Solve() method will be called. At the
@@ -44,4 +59,68 @@ class Agent:
     # Make sure to return your answer *as an integer* at the end of Solve().
     # Returning your answer as a string may cause your program to crash.
     def Solve(self,problem):
-        return -1
+       print "Evaluating "+problem.name
+
+       imageList = ['A','B','C']
+       imageMatrixArr = []
+
+       for img in imageList :
+           image = Image.open(problem.figures[img].visualFilename)
+           imageMatrixArr.append(self.imageToPixelMatrix(image))
+       (w, h) = image.size
+
+       #breaking the list in different individual list
+       A = imageMatrixArr[0]
+       B = imageMatrixArr[1]
+       C = imageMatrixArr[2]
+       D = np.zeros((w, h)) #[[0 for x in range(h)] for x in range(w)]
+       E = np.zeros((w, h)) #[[0 for x in range(h)] for x in range(w)]
+
+
+       # populate D based on the relation between A and B
+       for x in range(0, w) :
+           for y in range(0, h) :
+               if A[x][y] == B[x][y] :
+                   D[x][y] = C[x][y]
+               else :
+                   D[x][y] = 255 - C[x][y]
+
+               if A[x][y] == C[x][y] :
+                   E[x][y] = B[x][y]
+               else :
+                   E[x][y] = 255 - B[x][y]
+
+
+       ansImg = Image.fromarray(D)
+       ansImg.show()
+
+       optionsImageList = ['1','2','3','4','5','6']
+       optionsImageMatrix = []
+       # print "D: "
+       # print D
+
+       i = 0
+       for img in optionsImageList:
+           image = Image.open(problem.figures[img].visualFilename)
+           imageMatrix = self.imageToPixelMatrix(image)
+           # print optionsImageList[i]+": "
+           # print imageMatrix
+
+           if (imageMatrix == D).all():
+                print "Answer: " + problem.figures[img].name
+                return problem.figures[img].name
+
+           if (imageMatrix == E).all():
+                print "Answer: " + problem.figures[img].name
+                return problem.figures[img].name
+
+           i+=1
+
+           #optionsImageMatrix.append(self.imageToPixelMatrix(image))
+
+       print "No match found\n"
+       # r, g, b , a = im.split()
+       # variable = Image.merge("RGB", (b,g,r))
+       # print(np.asarray(variable))
+       # exit()
+       return -1
