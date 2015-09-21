@@ -52,9 +52,8 @@ class Agent:
             graph = self.formSemanticNet(problem)
             print "Printing graph: "
             pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(graph)
-            #graph.printAllCards()
-            #graph.printAllNodes()
+            graph.printAllCards()
+            graph.printAllNodes()
         return -1
 
     def formSemanticNet(self, problem):
@@ -79,8 +78,10 @@ class Agent:
         print "done building inCards. Initiating SemNet construction..."
         # now we can identify which attribute is an attribute and which attribute is a relation
         for figName, figure in problem.figures.iteritems():
-            pp.pprint("Parsing Figure: "+figName)
-            pp.pprint(figure)
+            print "Parsing Figure: "+figName
+            print figure.visualFilename
+            pp.pprint(figure.objects)
+
             card = Card(figure.name)
             for objName, obj in figure.objects.iteritems():
                 properties = {}

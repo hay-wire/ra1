@@ -11,8 +11,8 @@ class Node:
 
     def __init__(self, name, relations={}, properties={}):
         self.name = name
-        self.properties = relations
-        self.relations = properties
+        self.properties = properties
+        self.relations = relations
 
     def addProperties(self, property, value):
         self.properties[property] = value
@@ -35,9 +35,11 @@ class Node:
 
     def printNode(self):
 
-        for property, val in self.properties:
-            print "\t"+property+" : "+val
+        print "Node "+self.name
+        print "\tProperties: "
+        for property, val in self.properties.iteritems():
+            print "\t\t"+property+" : "+val
 
-
-        for relation, val in self.relations:
-            print "\t"+self.name + " ---"+relation+"--->"+val
+        print "\tRelations: "
+        for relation, val in self.relations.iteritems():
+            print "\t\t"+self.name + " -"+relation+"-> "+val

@@ -2,6 +2,7 @@ __author__ = 'haywire'
 
 from Nodes import Node
 from Card import Card
+import pprint
 
 class Graph:
     def __init__(self):
@@ -68,12 +69,16 @@ class Graph:
         return None
 
     def printAllCards(self):
-        for nodeName, cardName in self.inCard:
+        for nodeName, cardName in self.inCard.iteritems():
             print nodeName + " is in card " + cardName
 
 
     def printAllNodes(self):
-        for node in self.nodes:
+        print "Graph.nodes:"
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.nodes)
+
+        for nodeName, node in self.nodes.iteritems():
             node.printNode()
             print "\n"
 
