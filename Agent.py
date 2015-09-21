@@ -10,6 +10,9 @@
 
 # Install Pillow and uncomment this line to access image processing.
 #from PIL import Image
+from Graph import Graph
+from Card import Card
+import pprint
 
 class Agent:
     # The default constructor for your Agent. Make sure to execute any
@@ -44,4 +47,64 @@ class Agent:
     # Make sure to return your answer *as an integer* at the end of Solve().
     # Returning your answer as a string may cause your program to crash.
     def Solve(self,problem):
+
+        if problem.hasVerbal and problem.problemType == '2x2':
+            graph = self.formSemanticNet(problem)
+            print "Printing graph: "
+            pp = pprint.PrettyPrinter(indent=4)
+            pp.pprint(graph)
+            #graph.printAllCards()
+            #graph.printAllNodes()
         return -1
+
+    def formSemanticNet(self, problem):
+        graph = Graph()
+        inCard = {}
+        pp = pprint.PrettyPrinter(indent=4)
+
+        #populate all inCard[obects] = figure, before parsing other things
+        # example inCards[b] = A
+        for figName, figure in problem.figures.iteritems():
+            print "Figure: "+figName
+            pp.pprint(figure.objects)
+
+            for objName, obj in figure.objects.iteritems():
+                inCard[obj.name] = figure.name
+                pp.pprint(obj.attributes)
+
+        print "inCards are: "
+        pp.pprint(inCard)
+        graph.inCard = inCard
+
+        print "done building inCards. Initiating SemNet construction..."
+        # now we can identify which attribute is an attribute and which attribute is a relation
+        for figName, figure in problem.figures.iteritems():
+            pp.pprint("Parsing Figure: "+figName)
+            pp.pprint(figure)
+            card = Card(figure.name)
+            for objName, obj in figure.objects.iteritems():
+                properties = {}
+                properties['inCard'] = figure.name # add the additional property to identify the parent figure
+                relations = {}
+                #clientForMigration.php
+
+                #print "Object attributes:"
+                #pprint.pprint(obj.attributes)
+                for attrib, val in obj.attributes.iteritems():
+                    if val in inCard:
+                        # relations are saved in the format: relation['inside'] = 'b',
+                        # where inside is the relation and 'b; is the target node
+                        relations[attrib] = val
+                    else:
+                        # properties are saved in the format: properties['filled'] = 'yes'
+                        properties[attrib] = val
+
+                # got all relations and properties of the object. form the node now.
+                graph.addNode(obj.name, relations, properties)
+                card.addNode(graph.getNode(obj.name))
+            # end of for
+            graph.addCard(card)
+
+        return graph
+
+
