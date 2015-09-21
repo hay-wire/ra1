@@ -74,9 +74,9 @@ class Graph:
 
 
     def printAllNodes(self):
-        print "Graph.nodes:"
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(self.nodes)
+        # print "Graph.nodes:"
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(self.nodes)
 
         for nodeName, node in self.nodes.iteritems():
             node.printNode()

@@ -51,7 +51,6 @@ class Agent:
         if problem.hasVerbal and problem.problemType == '2x2':
             graph = self.formSemanticNet(problem)
             print "Printing graph: "
-            pp = pprint.PrettyPrinter(indent=4)
             graph.printAllCards()
             graph.printAllNodes()
         return -1
@@ -64,23 +63,23 @@ class Agent:
         #populate all inCard[obects] = figure, before parsing other things
         # example inCards[b] = A
         for figName, figure in problem.figures.iteritems():
-            print "Figure: "+figName
-            pp.pprint(figure.objects)
+            # print "Figure: "+figName
+            # pp.pprint(figure.objects)
 
             for objName, obj in figure.objects.iteritems():
                 inCard[obj.name] = figure.name
-                pp.pprint(obj.attributes)
+                #pp.pprint(obj.attributes)
 
-        print "inCards are: "
-        pp.pprint(inCard)
+        # print "inCards are: "
+        # pp.pprint(inCard)
         graph.inCard = inCard
 
         print "done building inCards. Initiating SemNet construction..."
         # now we can identify which attribute is an attribute and which attribute is a relation
         for figName, figure in problem.figures.iteritems():
-            print "Parsing Figure: "+figName
-            print figure.visualFilename
-            pp.pprint(figure.objects)
+            # print "Parsing Figure: "+figName
+            # print figure.visualFilename
+            # pp.pprint(figure.objects)
 
             card = Card(figure.name)
             for objName, obj in figure.objects.iteritems():
