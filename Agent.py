@@ -53,6 +53,9 @@ class Agent:
             print "Printing graph: "
             graph.printAllinCards()
             graph.printAllNodes()
+            graph.matchNodesInCards('A', 'B')
+            graph.matchNodesInCards('A', 'C')
+
         return -1
 
     def formSemanticNet(self, problem):

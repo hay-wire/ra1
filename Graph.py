@@ -3,12 +3,14 @@ __author__ = 'haywire'
 from Nodes import Node
 from Card import Card
 import pprint
+import operator
 
 class Graph:
     def __init__(self):
         self.nodes = {}
         self.cards = []
         self.inCard = {}
+        self.correspondenceList = {}
 
     # cardOfNodes is a dict which records which node is in which card.
     # ex: cardOfNode['a'] = 'A'
@@ -100,12 +102,19 @@ class Graph:
             'fill': 1
         }
         #if properties of the objects are similar, score them high else give them negative marking
-        for prop, w in weightCard:
-            if nodeX.properties[prop] == nodeY.properties[prop]:
-                score = score + w
-            else:
-                score = score - w
+        for prop, w in weightCard.iteritems():
+            print "Analysing factor: "+prop+"=>"+str(w)
 
+            try:
+                print "\t: "+nodeX.properties.get(prop)+" : " + nodeY.properties.get(prop)
+
+                if nodeX.properties.get(prop) == nodeY.properties.get(prop):
+                    score = score + w
+                else:
+                    score = score - w
+            except Exception, e:
+                score = score - w
+        print "Score: ("+nodeX.name+","+nodeY.name+")="+str(score)
         return score
 
     def matchNodesInCards(self, cardXName, cardYName):
@@ -114,9 +123,90 @@ class Graph:
         #    3. Identify next in series patterns between obx, oby => probable D
         #    4. score probable Ds to break tie
         #    5. return D
+        pp = pprint.PrettyPrinter(indent=4)
+
 
         cardX = self.getCard(cardXName)
         cardY = self.getCard(cardYName)
+        scoreList = {}
+        correspondenceList = {
+            'related': [],
+            'added': [],
+            'deleted': []
+        }
+
+        # form a set of all the nodes in the two cards to do elimination later
+        cardsSet = []
+        for nodeY in cardY.nodes:
+            cardsSet.append(nodeY.name)
+
+        # form the scoring matrix
+        for nodeX in cardX.nodes:
+            cardsSet.append(nodeX.name)
+            for nodeY in cardY.nodes:
+                # [a_p] [10]
+                # [a_q] [12]
+                # [b_p] [9]
+                # [b_q] [13]
+                scoreList[nodeX.name+","+nodeY.name] = self.calculateSimilarityInNodes(self, nodeX, nodeY)
+
+        # sort scoring matrix on scores
+        sortedScoreList = sorted(scoreList.items(), key=operator.itemgetter(1), reverse=True)
+        for nodeNames, score in sortedScoreList:
+            print "Cards set is now as follows: "
+            pp.pprint(cardsSet)
+            nodeX, nodeY = nodeNames.split(",")
+            if nodeX in cardsSet:
+                print nodeX+" in cardsSet"
+            else:
+                print nodeX+" not in cardsSet"
+
+            if nodeY in cardsSet:
+                print nodeY+" in cardsSet"
+            else:
+                print nodeY+" not in cardsSet"
+
+
+            if nodeX in cardsSet and nodeY not in cardsSet:
+                print "deleting "+ nodeX +","+ nodeY
+                correspondenceList['deleted'].append(nodeX)
+            elif nodeX not in cardsSet and nodeY in cardsSet:
+                print "adding "+ nodeX +","+ nodeY
+                correspondenceList['added'].append(nodeY)
+            elif nodeX in cardsSet and nodeY in cardsSet:
+                # both nodeX and nodeY are present in cardsList
+                print "related "+ nodeX +","+ nodeY
+                correspondenceList['related'].append((nodeX, nodeY))
+
+            # remove the just appended items from cards List
+            # cardsSet.remove(nodeX)
+            # cardsSet.remove(nodeY)
+            try:
+                cardsSet.remove(nodeX)
+            except Exception, e:
+                True # do nothing
+
+            try:
+                cardsSet.remove(nodeY)
+            except Exception, e:
+                True # do nothing
+
+        self.correspondenceList[cardXName+","+cardYName] = correspondenceList
+        pp.pprint(self.correspondenceList)
+
+
+    def predictDs(self):
+        Ds = []
+
+
+
+
+
+
+
+
+
+
 
 
 
