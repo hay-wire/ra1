@@ -51,7 +51,7 @@ class Agent:
         if problem.hasVerbal and problem.problemType == '2x2':
             graph = self.formSemanticNet(problem)
             print "Printing graph: "
-            graph.printAllCards()
+            graph.printAllinCards()
             graph.printAllNodes()
         return -1
 

@@ -17,6 +17,11 @@ class Graph:
     def addCard(self, card):
         self.cards.append(card)
 
+    def getCard(self, cardName):
+        for card in self.cards:
+            if card.name == cardName:
+                return card
+
     def nodeExists(self, nodeName):
         exists = True
         try:
@@ -45,7 +50,7 @@ class Graph:
     def generatePossibleNodes(self, A, B, C):
         # analyse the relations between A and B and
         # determine all the possible solutions for
-        D = [];
+        D = []
 
         #alanyse A:B first
         ABRel = A.getRelationsWith(B)
@@ -60,18 +65,20 @@ class Graph:
     def testGeneratedNodes(self):
         print "Hello"
 
-    def addCard(self, cardName):
-        card = Card(cardName)
-
     def getNode(self, nodeName):
         if self.nodeExists(nodeName):
             return self.nodes[nodeName]
         return None
 
-    def printAllCards(self):
-        for nodeName, cardName in self.inCard.iteritems():
-            print nodeName + " is in card " + cardName
+    def printAllinCards(self):
+        for nodeName, card in self.inCard.iteritems():
+            print nodeName + " is in card " + card
 
+        print "Cards Details:"
+        for card in self.cards:
+            print card.name
+            for node in card.nodes:
+                print "\t"+node.name
 
     def printAllNodes(self):
         # print "Graph.nodes:"
@@ -81,6 +88,39 @@ class Graph:
         for nodeName, node in self.nodes.iteritems():
             node.printNode()
             print "\n"
+
+
+    @staticmethod
+    def calculateSimilarityInNodes(self, nodeX, nodeY):
+        score = 0
+        weightCard = {
+            'shape': 10,
+            'size': 5,
+            'angle': 3,
+            'fill': 1
+        }
+        #if properties of the objects are similar, score them high else give them negative marking
+        for prop, w in weightCard:
+            if nodeX.properties[prop] == nodeY.properties[prop]:
+                score = score + w
+            else:
+                score = score - w
+
+        return score
+
+    def matchNodesInCards(self, cardXName, cardYName):
+        #    1. Fix cards
+        #    2. Match objects in card A and B
+        #    3. Identify next in series patterns between obx, oby => probable D
+        #    4. score probable Ds to break tie
+        #    5. return D
+
+        cardX = self.getCard(cardXName)
+        cardY = self.getCard(cardYName)
+
+
+
+
 
 
 
