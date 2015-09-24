@@ -95,12 +95,30 @@ class Graph:
     @staticmethod
     def calculateSimilarityInNodes(self, nodeX, nodeY):
         score = 0
-        weightCard = {
-            'shape': 10,
-            'size': 5,
-            'angle': 3,
-            'fill': 1
-        }
+        # weightCard = {
+        #     'shape': 10,
+        #     'size': 5,
+        #     'angle': 3,
+        #     'fill': 1
+        # }
+        # weightCard = {
+        #     'shape': 1,
+        #     'size': 1,
+        #     'angle': 1,
+        #     'fill': 1
+        # }
+
+        weightCard = {}
+        for key in nodeX.properties.keys():
+            weightCard[key] = 1
+
+        for key in nodeY.properties.keys():
+            weightCard[key] = 1
+
+        print "Weight Card: "
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(weightCard)
+
         #if properties of the objects are similar, score them high else give them negative marking
         for prop, w in weightCard.iteritems():
             print "Analysing factor: "+prop+"=>"+str(w)
@@ -132,7 +150,8 @@ class Graph:
         correspondenceList = {
             'related': [],
             'added': [],
-            'deleted': []
+            'deleted': [],
+            #'score': -100
         }
 
         # form a set of all the nodes in the two cards to do elimination later
@@ -176,7 +195,7 @@ class Graph:
             elif nodeX in cardsSet and nodeY in cardsSet:
                 # both nodeX and nodeY are present in cardsList
                 print "related "+ nodeX +","+ nodeY
-                correspondenceList['related'].append((nodeX, nodeY))
+                correspondenceList['related'].append((nodeX, nodeY, scoreList[nodeX+","+nodeY]))
 
             # remove the just appended items from cards List
             # cardsSet.remove(nodeX)
@@ -197,6 +216,10 @@ class Graph:
 
     def predictDs(self):
         Ds = []
+        # deducting D for 2x2
+        ABRel = self.correspondenceList['A,B']
+        ACRel = self.correspondenceList['A,C']
+
 
 
 
