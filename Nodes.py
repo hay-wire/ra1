@@ -9,10 +9,11 @@ class Node:
     # and relations are:
     #   relations['inside'] = 'a'
 
-    def __init__(self, name, relations={}, properties={}):
+    def __init__(self, name, relations={}, properties={}, similarity={}):
         self.name = name
         self.properties = properties
         self.relations = relations
+        self.similarity = similarity
 
     def addProperties(self, property, value):
         self.properties[property] = value
@@ -25,6 +26,9 @@ class Node:
 
     def addAllRelations(self, relations):
         self.relations = relations
+
+    def addSimilarity(self, targetCard, targetNode, score):
+        self.similarity[targetCard+'.'+targetNode] = score
 
     def getRelationsWith(self, target):
         relations = []

@@ -8,6 +8,7 @@ import operator
 class Graph:
     def __init__(self):
         self.nodes = {}
+        self.nodesSimilarityScores = {}
         self.cards = []
         self.inCard = {}
         self.correspondenceList = {}
@@ -146,7 +147,7 @@ class Graph:
 
         cardX = self.getCard(cardXName)
         cardY = self.getCard(cardYName)
-        scoreList = {}
+        scoreDict = {}
         correspondenceList = {
             'related': [],
             'added': [],
@@ -167,10 +168,14 @@ class Graph:
                 # [a_q] [12]
                 # [b_p] [9]
                 # [b_q] [13]
-                scoreList[nodeX.name+","+nodeY.name] = self.calculateSimilarityInNodes(self, nodeX, nodeY)
+                scoreDict[nodeX.name+","+nodeY.name] = self.calculateSimilarityInNodes(self, nodeX, nodeY)
 
         # sort scoring matrix on scores
-        sortedScoreList = sorted(scoreList.items(), key=operator.itemgetter(1), reverse=True)
+        sortedScoreList = sorted(scoreDict.items(), key=operator.itemgetter(1), reverse=True)
+        print "Sorted score list: "
+        self.nodesSimilarityScores['scoreDict'] = scoreDict
+        self.nodesSimilarityScores['sorted'] = sortedScoreList
+        #pp.pprint(sortedScoreList)
         for nodeNames, score in sortedScoreList:
             print "Cards set is now as follows: "
             pp.pprint(cardsSet)
@@ -195,7 +200,7 @@ class Graph:
             elif nodeX in cardsSet and nodeY in cardsSet:
                 # both nodeX and nodeY are present in cardsList
                 print "related "+ nodeX +","+ nodeY
-                correspondenceList['related'].append((nodeX, nodeY, scoreList[nodeX+","+nodeY]))
+                correspondenceList['related'].append((nodeX, nodeY, scoreDict[nodeX+","+nodeY]))
 
             # remove the just appended items from cards List
             # cardsSet.remove(nodeX)
@@ -214,11 +219,30 @@ class Graph:
         pp.pprint(self.correspondenceList)
 
 
-    def predictDs(self):
-        Ds = []
-        # deducting D for 2x2
-        ABRel = self.correspondenceList['A,B']
-        ACRel = self.correspondenceList['A,C']
+    def predictSolnCard(self, i, nodeAName, nodeBName, nodeCName):
+        # deducting  for 2x2
+        ABRel = self.correspondenceList[nodeAName+','+nodeBName]
+        ACRel = self.correspondenceList[nodeAName+','+nodeCName]
+
+        D = Card('D'+str(i))
+        #Predict number of nodes in D
+
+        cardsInA = len(self.cards[nodeAName].nodes)
+        cardsInB = len(self.cards[nodeBName].nodes)
+        cardsInC = len(self.cards[nodeCName].nodes)
+        cardsInD = cardsInC + (cardsInA - cardsInB)             #################### got 1 que
+
+        print "Cards in D are: "+ str(cardsInD)
+        # apply triangular properties and relations
+        #  A--B
+        #  |
+        #  C
+        #
+        # - Regus
+
+
+
+
 
 
 

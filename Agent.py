@@ -55,6 +55,7 @@ class Agent:
             graph.printAllNodes()
             graph.matchNodesInCards('A', 'B')
             graph.matchNodesInCards('A', 'C')
+            graph.predictSolnCard(0, 'A', 'B', 'C')
 
         return -1
 
