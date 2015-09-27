@@ -4,12 +4,13 @@ from Nodes import Node
 from Card import Card
 import pprint
 import operator
+import re
 
 class Graph:
     def __init__(self):
         self.nodes = {}
         self.nodesSimilarityScores = {}
-        self.cards = []
+        self.cards = {}
         self.inCard = {}
         self.correspondenceList = {}
 
@@ -18,12 +19,14 @@ class Graph:
     # cardOfNode['b'] = 'A'
     # cardOfNode['c'] = 'B' and so on
     def addCard(self, card):
-        self.cards.append(card)
+        self.cards[card.name] = card
 
     def getCard(self, cardName):
-        for card in self.cards:
-            if card.name == cardName:
-                return card
+        return self.cards[cardName]
+        # for key in self.cards:
+        #     card = self.cards[key]
+        #     if card.name == cardName:
+        #         return card
 
     def nodeExists(self, nodeName):
         exists = True
@@ -78,7 +81,8 @@ class Graph:
             print nodeName + " is in card " + card
 
         print "Cards Details:"
-        for card in self.cards:
+        for key in self.cards:
+            card = self.cards[key]
             print card.name
             for node in card.nodes:
                 print "\t"+node.name
@@ -122,8 +126,6 @@ class Graph:
 
         #if properties of the objects are similar, score them high else give them negative marking
         for prop, w in weightCard.iteritems():
-            print "Analysing factor: "+prop+"=>"+str(w)
-
             try:
                 print "\t: "+nodeX.properties.get(prop)+" : " + nodeY.properties.get(prop)
 
@@ -133,6 +135,9 @@ class Graph:
                     score = score - w
             except Exception, e:
                 score = score - w
+            print "Analysing factor: "+prop+"=>"+str(score)
+
+
         print "Score: ("+nodeX.name+","+nodeY.name+")="+str(score)
         return score
 
@@ -219,48 +224,181 @@ class Graph:
         pp.pprint(self.correspondenceList)
 
 
-    def predictSolnCard(self, i, nodeAName, nodeBName, nodeCName):
-        # deducting  for 2x2
-        ABRel = self.correspondenceList[nodeAName+','+nodeBName]
-        ACRel = self.correspondenceList[nodeAName+','+nodeCName]
+    def predictSolnCard(self, nodeAName, nodeBName, nodeCName, nodeDName):
+        pp = pprint.PrettyPrinter(indent=4)
 
-        D = Card('D'+str(i))
+        D = Card(nodeDName)
         #Predict number of nodes in D
 
-        cardsInA = len(self.cards[nodeAName].nodes)
-        cardsInB = len(self.cards[nodeBName].nodes)
-        cardsInC = len(self.cards[nodeCName].nodes)
-        cardsInD = cardsInC + (cardsInA - cardsInB)             #################### got 1 que
+        nodesInA = len(self.cards[nodeAName].nodes)
+        nodesInB = len(self.cards[nodeBName].nodes)
+        nodesInC = len(self.cards[nodeCName].nodes)
+        nodesInD = nodesInC - (nodesInA - nodesInB)            #################### got 1 que
 
-        print "Cards in D are: "+ str(cardsInD)
+        possibleSolns = {}
+        for i in range(1,6):
+            nodesInOption = len(self.cards[str(i)].nodes)
+            print "Nodes in D are: "+ str(nodesInD)
+            if nodesInOption == nodesInD:
+                try :
+                    # increment weight of the possible solution
+                    possibleSolns[self.cards[str(i).name]] = possibleSolns[self.cards[str(i)].name]+1
+                except Exception, e:
+                    #solution key did not exists, so initiate a new key for the answer and assign it weight 1
+                    possibleSolns[self.cards[str(i)].name] = 1
+
+        print "Possible solutions: "
+        pp.pprint(possibleSolns)
+
+        #find the possible answer with maximum weight and return it as answer
+        (ansName, w) = (-1, -1000)
+        for ansCardName in possibleSolns:
+            weight = possibleSolns[ansCardName]
+            if weight > w:
+                ansName = ansCardName
+
+        print "Returning answer: "
+        print ansName
+        #return ansName
         # apply triangular properties and relations
         #  A--B
         #  |
         #  C
         #
         # - Regus
+        #for i in range(1, nodesInOption):
+        i=-1
+        # deducting  for 2x2
+        ABRel = self.correspondenceList[nodeAName+','+nodeBName]
+        ACRel = self.correspondenceList[nodeAName+','+nodeCName]
+        # from ACRel.related, remove the sets which contain elements from AB.deleted
+        validNodesInC = []
+        for (x,y,w) in ACRel['related']:
+            if x not in ABRel['deleted']:
+                # find the related pair of x in ABRel[related] and match it with x
+                for (p, q,r) in ABRel['related']:
+                    if p == x:
+                        #got it. form CBRel
+                        validNodesInC.append((y, p, q, 0))
+
+        print "CABRelation nodes in C:"
+        pp.pprint(validNodesInC)
+
+        #also add newly added nodes
+        #for x in ABRel['added']:
+        #    validNodesInC.append(x)
+
+        i=-1
+        for (c, a, b, w) in validNodesInC:
+            i+=1
+            c = self.nodes[c]
+            a = self.nodes[a]
+            b = self.nodes[b]
+
+            dNode = Node(nodeDName+"_"+str(i), {}, {}, {})
+            print "Initialized dNode"+dNode.name
+            dNode.printNode()
+            D.addNode(dNode.name)
+            print "Creating nodes in "+dNode.name +"("+c.name+","+a.name+","+b.name+")"
+
+            # predict properties:
+            for property in b.properties:
+                print "Recreating property: "+b.name+"."+ property+"="+b.properties[property]+ " in "+dNode.name
+
+                # predict value of d.property based on the property type
+                valA  = a.properties[property]
+                valB = b.properties[property]
+                valC = c.properties[property]
+
+                if valA.isdigit() and valB.isdigit() and valC.isdigit():
+                    valD = int(valC)-(int(valA)-int(valB))
+                    print "int D."+property+" = "+str(valD)
+                    dNode.addProperties(property, str(valD) )
+
+                # Predict Boolean property
+                elif self.isBool(valA):
+                    if valA == valB:
+                        dNode.addProperties(property, valC)
+                    else:
+                        dNode.addProperties(property, self.invertBoolProperty(valC))
+
+                else:
+                    dNode.addProperties(property, self.predictFromChain(valA, valB, valC))
+
+            #predict relations:
+            for relation in b.relations:
+                dNode.addRelation(relation, len(b.relations[relation]))
+
+
+            dNode.addProperties('inCard', nodeDName)
+            dNode.printNode()
 
 
 
+        """
+        for (x,y,w) in ABRel['related']:
+            i+=1
+            x = self.nodes[x]
+            y = self.nodes[y]
 
 
+            dNode = Node(nodeDName+"_"+str(i))
+            D.addNode(dNode.name)
+            print ""
+            print "Creating nodes in "+dNode.name+" for ("+x.name+","+y.name+","+str(w)+")"
 
+            for property in y.properties:
+                print "Recreating property: "+y.name+"."+ property+"="+y.properties[property]+ " in "+dNode.name
 
+                # predict value of d.property based on the property type
+                valA  = x.properties[property]
+                valB = y.properties[property]
+                valC = y.properties[property]
 
+                if valA.isdigit() and valB.isdigit() and valC.isdigit():
+                    valD = int(valC)-(int(valA)-int(valB))
+                    print "int D."+property+" = "+str(valD)
+                    dNode.addProperties(property, str(valD) )
 
+                # Predict Boolean property
+                elif self.isBool(valA):
+                    if valA == valB:
+                        dNode.addProperties(property, valC)
+                    else:
+                        dNode.addProperties(property, self.invertBoolProperty(valC))
 
+                else:
+                    dNode.addProperties(property, -1000)
 
+            dNode.addProperties('inCard', nodeDName)
 
+            dNode.printNode()
+        """
+        return ansName
 
+    def isBool(self, property):
+        if property in ['true', 'yes', 'false', 'no']:
+            return True
+        return False
 
+    def invertBoolProperty(self, property):
+        a = ['yes', 'no']
+        if property  in a:
+            return a[(a.index(property)+1)%2]
+        b = ['true', 'false']
+        if property in b:
+            return a[(a.index(property)+1)%2]
 
+    def predictNumericProperty(self, propA, propB, propC):
+        return propC - (propA - propB)
 
-
-
-
-
-
-
+    def predictFromChain(self, propA, propB, propC):
+        if propA == propB:
+            return propC
+        elif propA == propC:
+            return propB
+        else:
+            return "__unknown__"
 
 
 

@@ -42,8 +42,8 @@ class Node:
         print "Node "+self.name
         print "\tProperties: "
         for property, val in self.properties.iteritems():
-            print "\t\t"+property+" : "+val
+            print "\t\t"+property+" : "+str(val)
 
         print "\tRelations: "
         for relation, val in self.relations.iteritems():
-            print "\t\t"+self.name + " -"+relation+"-> "+val
+            print "\t\t"+self.name + " -"+relation+"-> "+str(val)

@@ -13,5 +13,5 @@ class Card:
         if not nodeName in self.nodes:
             self.nodes.append(nodeName)
             return True
-        else:
+        else :
             return False

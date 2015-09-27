@@ -12,6 +12,7 @@
 #from PIL import Image
 from Graph import Graph
 from Card import Card
+import traceback
 import pprint
 
 class Agent:
@@ -48,6 +49,7 @@ class Agent:
     # Returning your answer as a string may cause your program to crash.
     def Solve(self,problem):
 
+        x=-1
         if problem.hasVerbal and problem.problemType == '2x2':
             graph = self.formSemanticNet(problem)
             print "Printing graph: "
@@ -55,9 +57,16 @@ class Agent:
             graph.printAllNodes()
             graph.matchNodesInCards('A', 'B')
             graph.matchNodesInCards('A', 'C')
-            graph.predictSolnCard(0, 'A', 'B', 'C')
+            try:
+                x = graph.predictSolnCard('A', 'B', 'C', 'D0')
+            except Exception, e:
+                print "Exception solving problem: "+ problem.name
+                traceback.print_exc()
+                print ""
+                raise e
 
-        return -1
+        print "done: "+problem.name
+        return x
 
     def formSemanticNet(self, problem):
         graph = Graph()
@@ -95,11 +104,22 @@ class Agent:
                 #print "Object attributes:"
                 #pprint.pprint(obj.attributes)
                 for attrib, val in obj.attributes.iteritems():
-                    if val in inCard:
-                        # relations are saved in the format: relation['inside'] = 'b',
-                        # where inside is the relation and 'b; is the target node
-                        relations[attrib] = val
-                    else:
+                    vals = val.split(",")
+                    isNode = True
+                    #print "Adding "+attrib+"==>"+val
+                    for v in vals:
+                        if v in inCard:
+                            # relations are saved in the format: relation['inside'] = 'b',
+                            # where inside is the relation and 'b; is the target node
+                            if attrib in relations:
+                                relations[attrib].append(v)
+                            else:
+                                relations[attrib] = [v]
+                        else:
+                            isNode = False
+                            break
+
+                    if not isNode:
                         # properties are saved in the format: properties['filled'] = 'yes'
                         properties[attrib] = val
 
