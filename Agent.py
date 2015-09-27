@@ -58,7 +58,9 @@ class Agent:
             graph.matchNodesInCards('A', 'B')
             graph.matchNodesInCards('A', 'C')
             try:
-                x = graph.predictSolnCard('A', 'B', 'C', 'D0')
+                cardDName = graph.predictSolnCard('A', 'B', 'C', 'D0')
+                graph.matchNodesInCards('C', cardDName)
+                graph.matchNodesInCards('B', cardDName)
             except Exception, e:
                 print "Exception solving problem: "+ problem.name
                 traceback.print_exc()

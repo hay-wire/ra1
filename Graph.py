@@ -37,7 +37,7 @@ class Graph:
         return exists
 
     # check if node exists. If not, then form a new node
-    def addNode(self, nodeName, relations={}, properties={}):
+    def addNode(self, nodeName, relations, properties):
         if self.nodeExists(nodeName) is not True :
             self.nodes[nodeName] = Node(nodeName, relations, properties)
 
@@ -162,6 +162,8 @@ class Graph:
 
         # form a set of all the nodes in the two cards to do elimination later
         cardsSet = []
+        print "Card Y is: "
+        pp.pprint(cardY.nodes)
         for nodeY in cardY.nodes:
             cardsSet.append(nodeY.name)
 
@@ -224,15 +226,15 @@ class Graph:
         pp.pprint(self.correspondenceList)
 
 
-    def predictSolnCard(self, nodeAName, nodeBName, nodeCName, nodeDName):
+    def predictSolnCard(self, cardAName, cardBName, cardCName, cardDName):
         pp = pprint.PrettyPrinter(indent=4)
 
-        D = Card(nodeDName)
+        D = Card(cardDName)
         #Predict number of nodes in D
 
-        nodesInA = len(self.cards[nodeAName].nodes)
-        nodesInB = len(self.cards[nodeBName].nodes)
-        nodesInC = len(self.cards[nodeCName].nodes)
+        nodesInA = len(self.cards[cardAName].nodes)
+        nodesInB = len(self.cards[cardBName].nodes)
+        nodesInC = len(self.cards[cardCName].nodes)
         nodesInD = nodesInC - (nodesInA - nodesInB)            #################### got 1 que
 
         possibleSolns = {}
@@ -269,8 +271,8 @@ class Graph:
         #for i in range(1, nodesInOption):
         i=-1
         # deducting  for 2x2
-        ABRel = self.correspondenceList[nodeAName+','+nodeBName]
-        ACRel = self.correspondenceList[nodeAName+','+nodeCName]
+        ABRel = self.correspondenceList[cardAName+','+cardBName]
+        ACRel = self.correspondenceList[cardAName+','+cardCName]
         # from ACRel.related, remove the sets which contain elements from AB.deleted
         validNodesInC = []
         for (x,y,w) in ACRel['related']:
@@ -295,10 +297,10 @@ class Graph:
             a = self.nodes[a]
             b = self.nodes[b]
 
-            dNode = Node(nodeDName+"_"+str(i), {}, {}, {})
+            dNode = Node(D.name+"_"+str(i), {}, {}, {})
             print "Initialized dNode"+dNode.name
             dNode.printNode()
-            D.addNode(dNode.name)
+            D.addNode(dNode)
             print "Creating nodes in "+dNode.name +"("+c.name+","+a.name+","+b.name+")"
 
             # predict properties:
@@ -326,12 +328,16 @@ class Graph:
                     dNode.addProperties(property, self.predictFromChain(valA, valB, valC))
 
             #predict relations:
-            for relation in b.relations:
-                dNode.addRelation(relation, len(b.relations[relation]))
+            #for relation in b.relations:
+            #    dNode.addRelation(relation, b.relations[relation])
 
 
-            dNode.addProperties('inCard', nodeDName)
+            dNode.addProperties('inCard', D.name)
             dNode.printNode()
+            self.addNode(dNode.name, dNode.properties, {})
+
+        self.addCard(D)
+        return D.name
 
 
 
@@ -342,7 +348,7 @@ class Graph:
             y = self.nodes[y]
 
 
-            dNode = Node(nodeDName+"_"+str(i))
+            dNode = Node(D.name+"_"+str(i))
             D.addNode(dNode.name)
             print ""
             print "Creating nodes in "+dNode.name+" for ("+x.name+","+y.name+","+str(w)+")"
@@ -370,7 +376,7 @@ class Graph:
                 else:
                     dNode.addProperties(property, -1000)
 
-            dNode.addProperties('inCard', nodeDName)
+            dNode.addProperties('inCard', D.name)
 
             dNode.printNode()
         """
