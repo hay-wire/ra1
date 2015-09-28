@@ -58,15 +58,18 @@ class Agent:
             graph.matchNodesInCards('A', 'B')
             graph.matchNodesInCards('A', 'C')
             try:
+                Ds = []
                 D0 = graph.predictSolnCard('A', 'B', 'C', 'D0')
                 graph.matchNodesInCards('C', D0)
                 graph.matchNodesInCards('B', D0)
+                Ds.append(D0)
 
-                D1 = graph.predictSolnCard('A', 'B', 'C', 'D0')
+                D1 = graph.predictSolnCard('A', 'B', 'C', 'D1')
                 graph.matchNodesInCards('C', D1)
                 graph.matchNodesInCards('B', D1)
+                Ds.append(D1)
 
-                soln = graph.selectProbableSolnCard([D0, D1], ['1', '2', '3', '4', '5', '6'])
+                soln = graph.selectProbableSolnCard(Ds, ['1', '2', '3', '4', '5', '6'])
             except Exception, e:
                 print "Exception solving problem: "+ problem.name
                 traceback.print_exc()

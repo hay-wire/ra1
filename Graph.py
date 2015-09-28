@@ -120,23 +120,25 @@ class Graph:
         for key in nodeY.properties.keys():
             weightCard[key] = 1
 
+        #remove our own special keys from weight card
+        weightCard.pop('inCard', None)
+
         print "Weight Card: "
         pp = pprint.PrettyPrinter(indent=4)
         pp.pprint(weightCard)
 
         #if properties of the objects are similar, score them high else give them negative marking
         for prop, w in weightCard.iteritems():
-            try:
-                print "\t: "+nodeX.properties.get(prop)+" : " + nodeY.properties.get(prop)
 
-                if nodeX.properties.get(prop) == nodeY.properties.get(prop):
-                    score = score + w
-                else:
+            if prop not in nodeX.properties or prop not in nodeY.properties:
+                score = score - 3 * w
+            elif nodeX.properties.get(prop) == nodeY.properties.get(prop):
+                score = score + w
+            else:
                     score = score - w
-            except Exception, e:
-                score = score - w
-            print "Analysing factor: "+prop+"=>"+str(score)
-
+            print "Analysing: "+nodeX.name+"."+prop+"=="+nodeY.name+"."+prop+" => "+ str(nodeX.properties.get(prop) == nodeY.properties.get(prop))+ " => " +str(score)
+            # except Exception, e:
+            #     score = score - w
 
         print "Score: ("+nodeX.name+","+nodeY.name+")="+str(score)
         return score
@@ -144,7 +146,7 @@ class Graph:
     def calculateSimilarityInCards(self, cardXName, cardYName):
         print "calculating similarity in "+cardXName+" and "+cardYName
         pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(self.cards)
+        #pp.pprint(self.cards)
 
         cardX = self.cards[cardXName]
         cardY = self.cards[cardYName]
@@ -212,6 +214,7 @@ class Graph:
                 # [a_q] [12]
                 # [b_p] [9]
                 # [b_q] [13]
+                print "form scoring matrix for: "+nodeX.name+","+nodeY.name
                 scoreDict[nodeX.name+","+nodeY.name] = self.calculateSimilarityInNodes(self, nodeX, nodeY)
 
         # sort scoring matrix on scores
@@ -275,6 +278,7 @@ class Graph:
         nodesInC = len(self.cards[cardCName].nodes)
         nodesInD = nodesInC - (nodesInA - nodesInB)            #################### got 1 que
 
+        """
         possibleSolns = {}
         for i in range(1,6):
             nodesInOption = len(self.cards[str(i)].nodes)
@@ -299,6 +303,7 @@ class Graph:
 
         print "Returning answer: "
         print ansName
+        """
         #return ansName
         # apply triangular properties and relations
         #  A--B
@@ -351,7 +356,9 @@ class Graph:
                 valC = c.properties[property]
 
                 if valA.isdigit() and valB.isdigit() and valC.isdigit():
-                    valD = int(valC)-(int(valA)-int(valB))
+                    valD = self.predictNumericProperty(property, int(valA), int(valB), int(valC))
+
+                    print "Predicting number: "+valC+"+("+valB+"-"+valA+")="+str(valD)
                     print "int D."+property+" = "+str(valD)
                     dNode.addProperties(property, str(valD) )
 
@@ -433,8 +440,11 @@ class Graph:
         if property in b:
             return a[(a.index(property)+1)%2]
 
-    def predictNumericProperty(self, propA, propB, propC):
-        return propC - (propA - propB)
+    def predictNumericProperty(self, property, valA, valB, valC):
+        valD = valC - (valB - valA)
+        if property == 'angle':
+            valD = valD % 360
+        return valD
 
     def predictFromChain(self, propA, propB, propC):
         if propA == propB:
