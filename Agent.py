@@ -49,7 +49,7 @@ class Agent:
     # Returning your answer as a string may cause your program to crash.
     def Solve(self,problem):
 
-        x=-1
+        soln=-1
         if problem.hasVerbal and problem.problemType == '2x2':
             graph = self.formSemanticNet(problem)
             print "Printing graph: "
@@ -58,9 +58,15 @@ class Agent:
             graph.matchNodesInCards('A', 'B')
             graph.matchNodesInCards('A', 'C')
             try:
-                cardDName = graph.predictSolnCard('A', 'B', 'C', 'D0')
-                graph.matchNodesInCards('C', cardDName)
-                graph.matchNodesInCards('B', cardDName)
+                D0 = graph.predictSolnCard('A', 'B', 'C', 'D0')
+                graph.matchNodesInCards('C', D0)
+                graph.matchNodesInCards('B', D0)
+
+                D1 = graph.predictSolnCard('A', 'B', 'C', 'D0')
+                graph.matchNodesInCards('C', D1)
+                graph.matchNodesInCards('B', D1)
+
+                soln = graph.selectProbableSolnCard([D0, D1], ['1', '2', '3', '4', '5', '6'])
             except Exception, e:
                 print "Exception solving problem: "+ problem.name
                 traceback.print_exc()
@@ -68,7 +74,7 @@ class Agent:
                 raise e
 
         print "done: "+problem.name
-        return x
+        return soln
 
     def formSemanticNet(self, problem):
         graph = Graph()

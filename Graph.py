@@ -141,6 +141,43 @@ class Graph:
         print "Score: ("+nodeX.name+","+nodeY.name+")="+str(score)
         return score
 
+    def calculateSimilarityInCards(self, cardXName, cardYName):
+        print "calculating similarity in "+cardXName+" and "+cardYName
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(self.cards)
+
+        cardX = self.cards[cardXName]
+        cardY = self.cards[cardYName]
+        score = 0
+        if len(cardY.nodes) == len(cardX.nodes):
+            score += 5
+        else:
+            score -= 100
+
+        correspondenceList = self.matchNodesInCards(cardXName, cardYName)
+        for (x, y , w) in correspondenceList['related']:
+            score += w
+
+        return score
+
+    def selectProbableSolnCard(self, solnCardsList, optionCardsList):
+        scoreDict = {}
+        for solnCardName in solnCardsList:
+            for optionCardName in optionCardsList:
+                print "Matching probable soln cards: "+solnCardName+" and "+optionCardName
+                scoreDict[solnCardName+","+optionCardName] = self.calculateSimilarityInCards(solnCardName, optionCardName)
+
+        sortedScoreList = sorted(scoreDict.items(), key=operator.itemgetter(1), reverse=True)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(sortedScoreList)
+        (cardsPair, score) = sortedScoreList[0]
+        cardNames = cardsPair.split(',')
+        print "Winner is: "+cardNames[1]
+        return cardNames[1]
+
+
+
+
     def matchNodesInCards(self, cardXName, cardYName):
         #    1. Fix cards
         #    2. Match objects in card A and B
@@ -224,6 +261,7 @@ class Graph:
 
         self.correspondenceList[cardXName+","+cardYName] = correspondenceList
         pp.pprint(self.correspondenceList)
+        return correspondenceList
 
 
     def predictSolnCard(self, cardAName, cardBName, cardCName, cardDName):
