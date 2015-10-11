@@ -278,32 +278,6 @@ class Graph:
         nodesInC = len(self.cards[cardCName].nodes)
         nodesInD = nodesInC - (nodesInA - nodesInB)            #################### got 1 que
 
-        """
-        possibleSolns = {}
-        for i in range(1,6):
-            nodesInOption = len(self.cards[str(i)].nodes)
-            print "Nodes in D are: "+ str(nodesInD)
-            if nodesInOption == nodesInD:
-                try :
-                    # increment weight of the possible solution
-                    possibleSolns[self.cards[str(i).name]] = possibleSolns[self.cards[str(i)].name]+1
-                except Exception, e:
-                    #solution key did not exists, so initiate a new key for the answer and assign it weight 1
-                    possibleSolns[self.cards[str(i)].name] = 1
-
-        print "Possible solutions: "
-        pp.pprint(possibleSolns)
-
-        #find the possible answer with maximum weight and return it as answer
-        (ansName, w) = (-1, -1000)
-        for ansCardName in possibleSolns:
-            weight = possibleSolns[ansCardName]
-            if weight > w:
-                ansName = ansCardName
-
-        print "Returning answer: "
-        print ansName
-        """
         #return ansName
         # apply triangular properties and relations
         #  A--B
@@ -373,8 +347,8 @@ class Graph:
                     dNode.addProperties(property, self.predictFromChain(valA, valB, valC))
 
             #predict relations:
-            #for relation in b.relations:
-            #    dNode.addRelation(relation, b.relations[relation])
+            for relation in b.relations:
+                dNode.addRelation(relation, b.relations[relation])
 
 
             dNode.addProperties('inCard', D.name)
@@ -383,49 +357,6 @@ class Graph:
 
         self.addCard(D)
         return D.name
-
-
-
-        """
-        for (x,y,w) in ABRel['related']:
-            i+=1
-            x = self.nodes[x]
-            y = self.nodes[y]
-
-
-            dNode = Node(D.name+"_"+str(i))
-            D.addNode(dNode.name)
-            print ""
-            print "Creating nodes in "+dNode.name+" for ("+x.name+","+y.name+","+str(w)+")"
-
-            for property in y.properties:
-                print "Recreating property: "+y.name+"."+ property+"="+y.properties[property]+ " in "+dNode.name
-
-                # predict value of d.property based on the property type
-                valA  = x.properties[property]
-                valB = y.properties[property]
-                valC = y.properties[property]
-
-                if valA.isdigit() and valB.isdigit() and valC.isdigit():
-                    valD = int(valC)-(int(valA)-int(valB))
-                    print "int D."+property+" = "+str(valD)
-                    dNode.addProperties(property, str(valD) )
-
-                # Predict Boolean property
-                elif self.isBool(valA):
-                    if valA == valB:
-                        dNode.addProperties(property, valC)
-                    else:
-                        dNode.addProperties(property, self.invertBoolProperty(valC))
-
-                else:
-                    dNode.addProperties(property, -1000)
-
-            dNode.addProperties('inCard', D.name)
-
-            dNode.printNode()
-        """
-        return ansName
 
     def isBool(self, property):
         if property in ['true', 'yes', 'false', 'no']:
