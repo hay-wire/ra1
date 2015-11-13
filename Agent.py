@@ -63,95 +63,52 @@ class Agent:
     def Solve(self,problem):
         print "Evaluating "+problem.name
 
-        imageList = ['A','B','C', 'D', 'E', 'F', 'G', 'H']
-        imageMatrixArr = []
+        imageList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+        ansImageList = [1, 2, 3, 4, 5, 6]
 
+        # convert question images into pixel matrices
+        imageMatrixArr = []
         for img in imageList :
-           image = Image.open(problem.figures[img].visualFilename)
+           image = Image.open(problem.figures[str(img)].visualFilename)
            imageMatrixArr.append(self.imageToPixelMatrix(image))
+
+        # size of any image in the problem set is same. so extract it from the last question image
         (w, h) = image.size
 
+        # convert answer images into pixel matrices
         ansMatrixArr = {}
-        for i in range(1, 7):
+        for i in ansImageList:
            print "ansImg is",i
            image = Image.open(problem.figures[str(i)].visualFilename)
            ansMatrixArr[str(i)] = self.imageToPixelMatrix(image)
 
-        #breaking the list in different individual list
-        A = imageMatrixArr[0]
-        B = imageMatrixArr[1]
-        C = imageMatrixArr[2]
-        D = imageMatrixArr[3]
-        E = imageMatrixArr[4]
-        F = imageMatrixArr[5]
-        G = imageMatrixArr[6]
-        H = imageMatrixArr[7]
 
-
-        #D = np.zeros((w, h)) #[[0 for x in range(h)] for x in range(w)]
-        #E = np.zeros((w, h)) #[[0 for x in range(h)] for x in range(w)]
-
+        # extract component micro patterns from the question images
         print "Triangularizing.."
-        trA = self.triangularize(A, w, h)
-        trB = self.triangularize(B, w, h)
-        trC = self.triangularize(C, w, h)
-        trD = self.triangularize(D, w, h)
-        trE = self.triangularize(E, w, h)
-        trF = self.triangularize(F, w, h)
-        trG = self.triangularize(G, w, h)
-        trH = self.triangularize(H, w, h)
+        tr = {}
+        j=0
+        for i in imageList:
+            # tr[A] = self.triangularize(imageMatrixArr[0], w, h)
+            tr[str(i)] = self.triangularize(imageMatrixArr[j], w, h)
+            j+=1
 
+
+        # sort each extracted micro patterns list for question images. sort by patterns with maximum count first.
+        # for example, if "-14-triangles" are 19274 and "24-squares" are 122 and "32-squares" are 1229, then order will
+        # be: -14-triangles, 32-squares, 24-squares ( i.e., in decreasing order)
+        sortedTr = {}
+        for i in imageList:
+            # sortedTrB = sorted(trB['attribs'], key=trB['attribs'].__getitem__, reverse=True)
+            sortedTr[str(i)] = sorted(tr[str(i)]['attribs'], key=tr[str(i)]['attribs'].__getitem__, reverse=True)
+            print "tr"+str(i)+": ", sortedTr[str(i)]
+
+        # sort each extracted micro patterns list for answer images
         trAns = {}
         sortedTrAns = {}
-        for i in range(1, 7):
+        for i in ansImageList:
             trAns[str(i)] = self.triangularize(ansMatrixArr[str(i)], w, h)
             sortedTrAns[str(i)] = sorted(trAns[str(i)]['attribs'], key=trAns[str(i)]['attribs'].__getitem__, reverse=True)
-
-
-        sortedTrA = sorted(trA['attribs'], key=trA['attribs'].__getitem__, reverse=True)
-        sortedTrB = sorted(trB['attribs'], key=trB['attribs'].__getitem__, reverse=True)
-        sortedTrC = sorted(trC['attribs'], key=trC['attribs'].__getitem__, reverse=True)
-        sortedTrD = sorted(trD['attribs'], key=trD['attribs'].__getitem__, reverse=True)
-        sortedTrE = sorted(trE['attribs'], key=trE['attribs'].__getitem__, reverse=True)
-        sortedTrF = sorted(trF['attribs'], key=trF['attribs'].__getitem__, reverse=True)
-        sortedTrG = sorted(trG['attribs'], key=trG['attribs'].__getitem__, reverse=True)
-        sortedTrH = sorted(trH['attribs'], key=trH['attribs'].__getitem__, reverse=True)
-
-        #print "trA: ", trA
-        print "trA: ",sortedTrA
-        # pp.pprint(trA)
-
-        #print "trB ", trB
-        print "trB: ",sortedTrB
-        # pp.pprint(trB)
-
-        #print "trC: ", trC
-        print "trC: ",sortedTrC
-        # pp.pprint(trC)
-
-        #print "trC: ", trC
-        print "trD: ",sortedTrD
-        # pp.pprint(trC)
-
-        #print "trC: ", trC
-        print "trE: ",sortedTrE
-        # pp.pprint(trC)
-
-        #print "trC: ", trC
-        print "trF: ",sortedTrF
-        # pp.pprint(trC)
-
-        #print "trC: ", trC
-        print "trG: ",sortedTrG
-        # pp.pprint(trC)
-
-        #print "trC: ", trC
-        print "trH: ",sortedTrH
-        # pp.pprint(trC)
-
-        print ""
-        for ans in sortedTrAns:
-            print str(ans)+":   ", sortedTrAns[ans]
+            print "Ans"+str(i)+":   ", sortedTrAns[str(i)]
 
         return -1
 
